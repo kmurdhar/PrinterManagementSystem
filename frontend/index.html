@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Print Monitor Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 2em; font-weight: bold; color: #2563eb; }
+        .filters { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .filter-input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .table-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; }
+        .status { padding: 4px 8px; border-radius: 12px; font-size: 0.8em; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .refresh-btn { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        .refresh-btn:hover { background: #1d4ed8; }
+        .error { color: #dc2626; padding: 20px; text-align: center; }
+        .loading { text-align: center; padding: 40px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖨️ Print Monitor Dashboard</h1>
+            <p>Real-time printing activity monitoring</p>
+            <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div>Total Jobs</div>
+                <div class="stat-value" id="totalJobs">0</div>
+            </div>
+            <div class="stat-card">
+                <div>Total Pages</div>
+                <div class="stat-value" id="totalPages">0</div>
+            </div>
+            <div class="stat-card">
+                <div>Active Users</div>
+                <div class="stat-value" id="activeUsers">0</div>
+            </div>
+            <div class="stat-card">
+                <div>Active Printers</div>
+                <div class="stat-value" id="activePrinters">0</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <h3>Filters</h3>
+            <div class="filter-grid">
+                <input type="text" class="filter-input" placeholder="Search documents..." id="searchInput">
+                <input type="text" class="filter-input" placeholder="Filter by user..." id="userFilter">
+                <input type="text" class="filter-input" placeholder="Filter by printer..." id="printerFilter">
+                <input type="date" class="filter-input" id="startDate">
+                <input type="date" class="filter-input" id="endDate">
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>User</th>
+                        <th>Machine</th>
+                        <th>Printer</th>
+                        <th>Pages</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="printJobsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+       
+	const API_BASE = 'http://localhost:3000/api';
+        
+        async function loadData() {
+            try {
+                document.getElementById('printJobsBody').innerHTML = '<tr><td colspan="7" class="loading">Loading...</td></tr>';
+                
+                // Get filter values
+                const filters = {
+                    search: document.getElementById('searchInput').value,
+                    user: document.getElementById('userFilter').value,
+                    printer: document.getElementById('printerFilter').value,
+                    startDate: document.getElementById('startDate').value,
+                    endDate: document.getElementById('endDate').value
+                };
+
+                // Build query string
+                const params = new URLSearchParams();
+                Object.entries(filters).forEach(([key, value]) => {
+                    if (value) params.append(key, value);
+                });
+
+                // Load print jobs
+                const jobsResponse = await fetch(`${API_BASE}/print-jobs?${params}`);
+                const jobsData = await jobsResponse.json();
+                
+                if (jobsData.success) {
+                    displayPrintJobs(jobsData.data);
+                }
+
+                // Load statistics
+                const statsResponse = await fetch(`${API_BASE}/stats`);
+                const statsData = await statsResponse.json();
+                
+                if (statsData.success) {
+                    displayStats(statsData.data);
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('printJobsBody').innerHTML = 
+                    '<tr><td colspan="7" class="error">Error loading data. Make sure the API server is running.</td></tr>';
+            }
+        }
+
+        function displayPrintJobs(jobs) {
+            const tbody = document.getElementById('printJobsBody');
+            
+            if (jobs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No print jobs found. Print something to test!</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = jobs.map(job => `
+                <tr>
+                    <td><strong>${job.document_name || 'Unknown Document'}</strong></td>
+                    <td>${job.user_name}</td>
+                    <td>${job.machine_name}</td>
+                    <td>${job.printer_name}</td>
+                    <td>${job.page_count} pages</td>
+                    <td>${new Date(job.print_time).toLocaleString()}</td>
+                    <td><span class="status status-${job.status}">${job.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function displayStats(stats) {
+            document.getElementById('totalJobs').textContent = stats.totalJobs || 0;
+            document.getElementById('totalPages').textContent = stats.totalPages || 0;
+            document.getElementById('activeUsers').textContent = stats.topUsers?.length || 0;
+            document.getElementById('activePrinters').textContent = stats.topPrinters?.length || 0;
+        }
+
+        // Add event listeners for filters
+        ['searchInput', 'userFilter', 'printerFilter', 'startDate', 'endDate'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                setTimeout(loadData, 300); // Debounce
+            });
+        });
+
+        // Load data on page load
+        loadData();
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>

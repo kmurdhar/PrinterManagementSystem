@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: printmonitor_db
+    environment:
+      POSTGRES_DB: printmonitor
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: printmonitor123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - printmonitor_network
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: printmonitor_api
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: printmonitor
+      DB_USER: postgres
+      DB_PASSWORD: printmonitor123
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - printmonitor_network
+    restart: unless-stopped
+
+  frontend:
+    image: nginx:alpine
+    container_name: printmonitor_web
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    networks:
+      - printmonitor_network
+    restart: unless-stopped
+
+networks:
+  printmonitor_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

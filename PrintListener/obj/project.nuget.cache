@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "dgSpecHash": "aUO3/ow/jRQmUltseoUXv3whDD4HHM9t7Y0sKYfb3skHRrJ49dG39BrFhVxedy0SmA7QrJizxtzyxPwWZyh06Q==",
+  "success": true,
+  "projectFilePath": "/home/kamlesh/Kamlesh/Backup/Doc/Pawan/Printer/PrintMonitorSystem/PrintListener/PrintListener.csproj",
+  "expectedPackageFiles": [
+    "/home/kamlesh/.nuget/packages/microsoft.bcl.asyncinterfaces/9.0.6/microsoft.bcl.asyncinterfaces.9.0.6.nupkg.sha512",
+    "/home/kamlesh/.nuget/packages/system.buffers/4.5.1/system.buffers.4.5.1.nupkg.sha512",
+    "/home/kamlesh/.nuget/packages/system.codedom/9.0.6/system.codedom.9.0.6.nupkg.sha512",
+    "/home/kamlesh/.nuget/packages/system.io.pipelines/9.0.6/system.io.pipelines.9.0.6.nupkg.sha512",
+    "/home/kamlesh/.nuget/packages/system.management/9.0.6/system.management.9.0.6.nupkg.sha512",
+    "/home/kamlesh/.nuget/packages/system.memory/4.5.5/system.memory.4.5.5.nupkg.sha512",
+    "/home/kamlesh/.nuget/packages/system.runtime.compilerservices.unsafe/6.0.0/system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
+    "/home/kamlesh/.nuget/packages/system.text.encodings.web/9.0.6/system.text.encodings.web.9.0.6.nupkg.sha512",
+    "/home/kamlesh/.nuget/packages/system.text.json/9.0.6/system.text.json.9.0.6.nupkg.sha512",
+    "/home/kamlesh/.nuget/packages/system.threading.tasks.extensions/4.5.4/system.threading.tasks.extensions.4.5.4.nupkg.sha512"
+  ],
+  "logs": []
+}
