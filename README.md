@@ -45,3 +45,10 @@ cd frontend
 python3 -m http.server 8080
 
 # Open browser to: http://localhost:8080
+
+
+
+# Run Test 
+
+cd Scripts
+./test-print-monitor.sh
